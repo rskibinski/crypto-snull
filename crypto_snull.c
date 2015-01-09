@@ -218,8 +218,8 @@ int crypto_init_module(void) {
 
 	np_t.name = "LRNG";
 	strlcpy(np_t.dev_name, tun_device, IFNAMSIZ);
-	np_t.local_ip.ip = htonl(inet_addr(local_address));
-	np_t.remote_ip.ip = htonl(inet_addr(remote_address));
+	np_t.local_ip.ip = inet_addr(local_address);
+	np_t.remote_ip.ip = inet_addr(remote_address);
 	np_t.local_port = rx_port;
 	np_t.remote_port = tx_port;
 	memset(np_t.remote_mac, 0xff, ETH_ALEN);
