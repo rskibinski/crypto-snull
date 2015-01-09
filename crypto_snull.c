@@ -180,7 +180,6 @@ void crypto_init(struct net_device *dev) {
 	ether_setup(dev);
 
 	dev->watchdog_timeo = timeout;
-	dev->flags |= IFF_NOARP;
 	dev->features |= NETIF_F_HW_CSUM;/* Can checksum all the packets. */
 	dev->netdev_ops = &crypto_netdev_ops;
 	dev->header_ops = &crypto_header_ops;
