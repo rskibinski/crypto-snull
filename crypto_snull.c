@@ -89,6 +89,10 @@ struct crypto_priv {
 };
 
 int crypto_open(struct net_device *dev) {
+	int retval;
+
+	int retval = request_irq(dev->irq, )
+
 	memcpy(dev->dev_addr, "\0CRYPTO", ETH_ALEN); //TODO Check if it matters in vint if its corect
 	netif_start_queue(dev);//start passing packets to upper layers
 	return 0;//TODO: Check result of above?
@@ -142,9 +146,11 @@ int crypto_tx(struct sk_buff *skb, struct net_device *dev) {
 	data = skb->data;
 	len = skb->len;
 
-	printk(KERN_DEBUG "DATA SENDING %d: %s", len, data);
+	printk(KERN_DEBUG "DATA SENDING %d: %s\n", len, data);
 	dev->trans_start = jiffies;
 	netpoll_send_udp(np, data, len);
+
+
 	return 0;
 }
 
@@ -198,6 +204,54 @@ void crypto_cleanup(void) {
 	}
 	return;
 }
+
+void crypto_rx(struct net_device *dev, struct crypto_packet *pkt){
+	struct sk_buff *skb;
+	struct crypto_priv *priv = netdev_priv(dev);
+
+	skb = dev_alloc_skb(pkt->datalen +2);
+	skb_reserve(skb,2);
+	skb->dev = dev;
+	skb->protocol = eth_type_trans(skb, dev);
+	skb->ip_summed = CHECKSUM_UNNECESSARY; //TODO Check cheksum
+	priv->stats.rx_packets++;
+	priv->stats.rx_bytes += pkt->datalen;
+	netif_rx(skb);
+	out: return;
+}
+
+static void crypto_rx_interrupt(int rq, void *dev_id, struct pt_regs *regs){
+	int statusword;
+	struct crypto_priv *priv;
+	struct crypto_packet *pkt = NULL;
+
+	struct net_device *dev= (struct net_device *)dev_id;
+	if(!dev){
+		printk(KERN_DEBUG "crypto_snull: dev null\n");
+	}
+	priv = netdev_priv(dev);
+	spin_lock(&priv->lock);
+
+	statusword = priv->status;
+	priv->status = 0;
+	if (statusword & SNULL_RX_INTR){
+		printk(KERN_DEBUG "crypto_snull: rx interruption\n");
+		pkt = priv->rx_queue;
+		if(pkt){
+			priv->rx_queue = pkt->next;
+			crypto_rx(dev, pkt);
+		}
+	}
+	if (statusword & SNULL_TX_INTR){
+		printk(KERN_DEBUG "crypto_snull: tx interruption\n");
+	}
+	spin_unlock(&priv->lock);
+	//TODO: relase buffer
+	return;
+
+}
+
+//static irqreturn_t net
 
 int crypto_init_module(void) {
 	int result, ret = -ENOMEM; // TODO Why?

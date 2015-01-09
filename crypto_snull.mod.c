@@ -25,6 +25,9 @@ __attribute__((section("__versions"))) = {
 	{ 0x5792f848, __VMLINUX_SYMBOL_STR(strlcpy) },
 	{ 0xa8806e07, __VMLINUX_SYMBOL_STR(register_netdev) },
 	{ 0xc25cf0a9, __VMLINUX_SYMBOL_STR(alloc_netdev_mqs) },
+	{ 0x9ecf18e, __VMLINUX_SYMBOL_STR(netif_rx) },
+	{ 0x6f957436, __VMLINUX_SYMBOL_STR(eth_type_trans) },
+	{ 0x5b3a8e4a, __VMLINUX_SYMBOL_STR(__netdev_alloc_skb) },
 	{ 0x6fe1f286, __VMLINUX_SYMBOL_STR(free_netdev) },
 	{ 0x423a11c9, __VMLINUX_SYMBOL_STR(unregister_netdev) },
 	{ 0x37a0cba, __VMLINUX_SYMBOL_STR(kfree) },
@@ -45,4 +48,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "26FB92DAFDCA80E1EDE3821");
+MODULE_INFO(srcversion, "69D144E26B23EEFFC0D9E8F");
