@@ -55,6 +55,7 @@ struct crypto_priv {
 	int tx_packetlen;
 	u8 *tx_packetdata; // data to transmit yet?
 	struct sk_buff *skb;//to relase memory?
+	struct crypto_cipher *tfm;
 	spinlock_t lock;
 };
 

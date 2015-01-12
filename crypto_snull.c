@@ -22,6 +22,10 @@
 #include <linux/tcp.h>         /* struct tcphdr */
 #include <linux/skbuff.h>
 
+#include <linux/scatterlist.h>
+#include <linux/crypto.h>
+#include <crypto/aes.h>
+
 #include "crypto_snull.h"
 
 #include <linux/in6.h>
@@ -48,6 +52,8 @@ char *local_address = "179.0.1.128";
 module_param(local_address, charp, 0000)
 ;
 
+u8 *key = "notverysafe";
+
 int rx_port = 6666;
 int tx_port = 6665;
 
@@ -71,6 +77,7 @@ static int pirq = 68;
 
 int crypto_open(struct net_device *dev) {
 	int retval;
+	struct crypto_priv *priv = netdev_priv(dev);
 	memcpy(dev->dev_addr, "\0CRYPTO", ETH_ALEN); //TODO Check if it matters in vint if its corect
 
 	//interrupt request for rx thread work and cleanup after tx
@@ -81,8 +88,15 @@ int crypto_open(struct net_device *dev) {
 		return retval;
 	}
 
+	priv->tfm = crypto_alloc_cipher("aes", 0, CRYPTO_ALG_ASYNC);
+	if (!IS_ERR(priv->tfm)) {
+		crypto_cipher_setkey(priv->tfm, key, sizeof(key));
+	} else {
+		retval = -1; //TODO: extract err no
+	}
+
 	netif_start_queue(dev);//start passing packets to upper layers
-	return 0;//TODO: Check result of above?
+	return retval;
 }
 
 int crypto_close(struct net_device *dev) {
@@ -125,19 +139,25 @@ void crypto_teardown_pool(struct net_device *dev) {
 		/* FIXME - in-flight packets ? */
 	}
 }
+// decryption and encryption based on aes_ccm.c
 
 int crypto_tx(struct sk_buff *skb, struct net_device *dev) {
-	int len;
+	int len, num_blocks, last_len;
+	int i, j;
 	char *data, shortpkt[ETH_ZLEN];//TODO: Whats shortpkt
 	struct crypto_priv *priv = netdev_priv(dev);
-
+	struct scatterlist *sg;
 	data = skb->data;
 	len = skb->len;
 
+	sg_init_table(sg, 1);
+	sg_copy_from_buffer(sg, 1, data, len);
+// encrypt
+	sg_copy_to_buffer(sg, 1, data, len);
 	printk(KERN_DEBUG "DATA SENDING %d: %s\n", len, data);
 	dev->trans_start = jiffies;
 	netpoll_send_udp(np, data, len);
-
+//todo free scatterlist somehow?
 	return 0;
 }
 
@@ -173,7 +193,6 @@ static irqreturn_t crypto_interrupt(int rq, void *dev_id) {
 	int statusword;
 	struct crypto_priv *priv;
 	struct crypto_packet *pkt = NULL;
-
 
 	struct net_device *dev = (struct net_device *) dev_id;
 	printk(KERN_DEBUG "%s: interruption received\n", dev->name);

@@ -1047,6 +1047,8 @@ deps_/home/host1/crypto-snull/crypto_snull.o := \
   include/net/tcp_states.h \
   include/net/timewait_sock.h \
   include/uapi/linux/tcp.h \
+  include/linux/crypto.h \
+  include/crypto/aes.h \
   /home/host1/crypto-snull/crypto_snull.h \
   include/linux/netpoll.h \
 
