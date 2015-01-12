@@ -88,12 +88,12 @@ int crypto_open(struct net_device *dev) {
 		return retval;
 	}
 
-	priv->tfm = crypto_alloc_cipher("aes", 0, CRYPTO_ALG_ASYNC);
-	if (!IS_ERR(priv->tfm)) {
-		crypto_cipher_setkey(priv->tfm, key, sizeof(key));
-	} else {
-		retval = -1; //TODO: extract err no
-	}
+//	priv->tfm = crypto_alloc_cipher("aes", 0, 0);
+//	if (!IS_ERR(priv->tfm)) {
+//		crypto_cipher_setkey(priv->tfm, key, sizeof(key));
+//	} else {
+//		retval = -1; //TODO: extract err no
+//	}
 
 	netif_start_queue(dev);//start passing packets to upper layers
 	return retval;
@@ -150,10 +150,10 @@ int crypto_tx(struct sk_buff *skb, struct net_device *dev) {
 	data = skb->data;
 	len = skb->len;
 
-	sg_init_table(sg, 1);
-	sg_copy_from_buffer(sg, 1, data, len);
-// encrypt
-	sg_copy_to_buffer(sg, 1, data, len);
+//	sg_init_table(sg, 1);
+//	sg_copy_from_buffer(sg, 1, data, len);
+//// encrypt
+//	sg_copy_to_buffer(sg, 1, data, len);
 	printk(KERN_DEBUG "DATA SENDING %d: %s\n", len, data);
 	dev->trans_start = jiffies;
 	netpoll_send_udp(np, data, len);

@@ -42,7 +42,6 @@ __attribute__((section("__versions"))) = {
 	{ 0x16305289, __VMLINUX_SYMBOL_STR(warn_slowpath_null) },
 	{ 0xf20dabd8, __VMLINUX_SYMBOL_STR(free_irq) },
 	{ 0x27e1a049, __VMLINUX_SYMBOL_STR(printk) },
-	{ 0x65a97d07, __VMLINUX_SYMBOL_STR(crypto_alloc_base) },
 	{ 0x2072ee9b, __VMLINUX_SYMBOL_STR(request_threaded_irq) },
 	{ 0xbdfb6dbb, __VMLINUX_SYMBOL_STR(__fentry__) },
 };
@@ -53,4 +52,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "56D9EB82E740431AC25B95E");
+MODULE_INFO(srcversion, "11894B65D253A7190629BE5");
